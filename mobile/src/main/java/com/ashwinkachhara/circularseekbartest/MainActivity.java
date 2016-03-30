@@ -1,5 +1,6 @@
 package com.ashwinkachhara.circularseekbartest;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -27,6 +28,13 @@ import android.view.View;
 import android.widget.MediaController;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +46,7 @@ import android.widget.MediaController.MediaPlayerControl;
 public class MainActivity extends AppCompatActivity implements MediaPlayerControl {
 
     private ArrayList<Song> songList;
+    private ArrayList<String> songTitles;
     private ListView songView;
     private MusicService musicSrv;
     private Intent playIntent;
@@ -47,6 +56,10 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
     private boolean paused=false, playbackPaused=false;
 
+    GoogleApiClient mApiClient;
+
+    private static final String SONG_KEY = "com.ashwinkachhara.key.song";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        Button play = (Button) findViewById(R.id.playButton);
+//        Button play = (Button) findViewById(R.id.playButton);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -63,12 +76,12 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                         .setAction("Action", null).show();
             }
         });
-        play.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                audioPlayer("mnt/sdcard/Music", "01 - Step Out.mp3");
-            }
-        });
+//        play.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                audioPlayer("mnt/sdcard/Music", "01 - Step Out.mp3");
+//            }
+//        });
 
         songView = (ListView) findViewById(R.id.song_list);
         songList = new ArrayList<Song>();
@@ -80,10 +93,51 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
             }
         });
 
+        songTitles = new ArrayList<String>();
+        getSongTitles();
+
         SongAdapter songAdt = new SongAdapter(this, songList);
         songView.setAdapter(songAdt);
 
         setController();
+
+        mApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle bundle) {
+                        Log.d("GOOGAPI", "onConnected: " + bundle);
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        Log.d("GOOGAPI", "onConnectionSuspended: " + i);
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult connectionResult) {
+                        Log.d("GOOGAPI", "onConnectionFailed " + connectionResult);
+                    }
+                })
+                .addApi(Wearable.API)
+                .build();
+        mApiClient.connect();
+
+        sendSongListToWear();
+    }
+
+    public void sendSongListToWear() {
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/SongList");
+        putDataMapReq.getDataMap().putStringArrayList(SONG_KEY,songTitles);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+
+    }
+
+    public void getSongTitles(){
+        for (int i=0; i<songList.size();i++){
+            songTitles.add(songList.get(i).getTitle());
+        }
     }
 
     //connect to the service
@@ -158,35 +212,35 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         super.onStop();
     }
 
-    public void audioPlayer(String path, String filename){
-        MediaPlayer mp = new MediaPlayer();
-
-        try {
-            mp.setDataSource(path+"/"+filename);
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        try {
-            mp.prepare();
-        } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        mp.start();
-
-    }
+//    public void audioPlayer(String path, String filename){
+//        MediaPlayer mp = new MediaPlayer();
+//
+//        try {
+//            mp.setDataSource(path+"/"+filename);
+//        } catch (IllegalArgumentException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        } catch (IllegalStateException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//
+//        try {
+//            mp.prepare();
+//        } catch (IllegalStateException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//
+//        mp.start();
+//
+//    }
 
     public void songPicked(View view){
 //        Log.d("SONG",Integer.toString(Integer.parseInt(view.getTag().toString())));

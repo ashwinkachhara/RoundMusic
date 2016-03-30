@@ -29,13 +29,13 @@
         android:layout_height="wrap_content" >
     </ListView>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Play Music!"
-        android:layout_margin="300px"
-        android:id="@+id/playButton"
-        />
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Play Music!"-->
+        <!--android:layout_margin="300px"-->
+        <!--android:id="@+id/playButton"-->
+        <!--/>-->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

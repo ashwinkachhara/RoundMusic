@@ -7,16 +7,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 /**
  * Created by ashwin on 2/21/16.
  */
 public final class Adapter extends WearableListView.Adapter {
-    private String[] mDataset;
+    private ArrayList<String> mDataset;
     private final Context mContext;
     private final LayoutInflater mInflater;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public Adapter(Context context, String[] dataset) {
+    public Adapter(Context context, ArrayList<String> dataset) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mDataset = dataset;
@@ -51,7 +54,7 @@ public final class Adapter extends WearableListView.Adapter {
         ItemViewHolder itemHolder = (ItemViewHolder) holder;
         TextView view = itemHolder.textView;
         // replace text contents
-        view.setText(mDataset[position]);
+        view.setText(mDataset.get(position));
         // replace list item's metadata
         holder.itemView.setTag(position);
     }
@@ -60,6 +63,6 @@ public final class Adapter extends WearableListView.Adapter {
     // (invoked by the WearableListView's layout manager)
     @Override
     public int getItemCount() {
-        return mDataset.length;
+        return mDataset.size();
     }
 }
