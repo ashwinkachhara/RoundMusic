@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context="com.ashwinkachhara.circularseekbartest.NowPlayingActivity"
+    tools:deviceIds="wear">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/prev"
+        android:id="@+id/prevButton"
+        android:layout_marginTop="140px"
+        android:layout_marginLeft="20px"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/next"
+        android:id="@+id/nextButton"
+        android:layout_marginTop="140px"
+        android:layout_marginLeft="240px"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/search"
+        android:id="@+id/searchButton"
+        android:layout_marginTop="240px"
+        android:layout_marginLeft="140px"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/playpause"
+        android:id="@+id/playPauseButton"
+        android:layout_marginTop="80px"
+        android:layout_marginLeft="87px"/>
+
+</android.support.wearable.view.BoxInsetLayout>

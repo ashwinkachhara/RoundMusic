@@ -2,6 +2,7 @@ package com.ashwinkachhara.circularseekbartest;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -86,6 +87,8 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+
+        MainActivity.this.startActivity(new Intent(MainActivity.this,NowPlayingActivity.class));
 
     }
 
