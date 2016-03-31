@@ -15,7 +15,7 @@
         android:src="@drawable/prev"
         android:id="@+id/prevButton"
         android:layout_marginTop="140px"
-        android:layout_marginLeft="20px"/>
+        android:layout_marginLeft="40px"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -23,7 +23,7 @@
         android:src="@drawable/next"
         android:id="@+id/nextButton"
         android:layout_marginTop="140px"
-        android:layout_marginLeft="240px"/>
+        android:layout_marginLeft="220px"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -34,15 +34,15 @@
         android:layout_marginLeft="140px"/>
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="120px"
+        android:layout_height="120px"
         android:src="@drawable/playpause"
         android:id="@+id/playPauseButton"
-        android:layout_marginTop="80px"
-        android:layout_marginLeft="87px"/>
+        android:layout_marginTop="95px"
+        android:layout_marginLeft="100px"/>
 
     <com.devadvance.circularseekbar.CircularSeekBar
-        android:id="@+id/circularSeekBar1"
+        android:id="@+id/nowPlayingVolumeSeek"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"

@@ -88,7 +88,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                 .addOnConnectionFailedListener(this)
                 .build();
         mApiClient.connect();
-        MainActivity.this.startActivity(new Intent(MainActivity.this,NowPlayingActivity.class));
+
 
     }
 
@@ -126,6 +126,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                     songTitles = dataMap.getStringArrayList(SONG_KEY);
                     GOT_SONGS = true;
                     loadAdapter();
+                    MainActivity.this.startActivity(new Intent(MainActivity.this, NowPlayingActivity.class));
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted

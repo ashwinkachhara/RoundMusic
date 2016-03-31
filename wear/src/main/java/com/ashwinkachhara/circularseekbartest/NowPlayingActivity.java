@@ -1,5 +1,6 @@
 package com.ashwinkachhara.circularseekbartest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
@@ -7,11 +8,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.devadvance.circularseekbar.CircularSeekBar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
@@ -29,12 +35,14 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     private BoxInsetLayout mContainerView;
 
     ImageView playPauseB, prevB, nextB, searchB;
+    CircularSeekBar volumeSeekBar;
 
     private GoogleApiClient mApiClient;
 
     private static final String PLAY_TOGGLE_KEY = "com.ashwinkachhara.key.playtoggle";
     private static final String NEXTSONG_KEY = "com.ashwinkachhara.key.nextsong";
     private static final String PREVSONG_KEY = "com.ashwinkachhara.key.prevsong";
+    private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
 
     Boolean playToggleState = false;
     Boolean nextSongState = false;
@@ -52,6 +60,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         prevB = (ImageView) findViewById(R.id.prevButton);
         nextB = (ImageView) findViewById(R.id.nextButton);
         searchB = (ImageView) findViewById(R.id.searchButton);
+        volumeSeekBar = (CircularSeekBar) findViewById(R.id.nowPlayingVolumeSeek);
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -63,15 +72,15 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         playPauseB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendToPhone("/PlayToggle",PLAY_TOGGLE_KEY,playToggleState);
-                playToggleState = ! playToggleState;
+                sendBoolToPhone("/PlayToggle", PLAY_TOGGLE_KEY, playToggleState);
+                playToggleState = !playToggleState;
             }
         });
 
         prevB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendToPhone("/PrevSong",PREVSONG_KEY,prevSongState);
+                sendBoolToPhone("/PrevSong",PREVSONG_KEY,prevSongState);
                 prevSongState = ! prevSongState;
             }
         });
@@ -79,7 +88,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         nextB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendToPhone("/NextSong",NEXTSONG_KEY,nextSongState);
+                sendBoolToPhone("/NextSong",NEXTSONG_KEY,nextSongState);
                 nextSongState = ! nextSongState;
             }
         });
@@ -87,11 +96,38 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         searchB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                NowPlayingActivity.this.startActivity(new Intent(NowPlayingActivity.this,MainActivity.class));
+            }
+        });
+
+        volumeSeekBar.setMax(100);
+
+        volumeSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
+                sendIntToPhone("/MusicVolume", VOLUME_KEY, progress);
+            }
+
+            @Override
+            public void onStopTrackingTouch(CircularSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(CircularSeekBar seekBar) {
+
             }
         });
     }
 
-    private void sendToPhone(String path, String key, Boolean data){
+    private void sendIntToPhone(String path, String key, Integer data){
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(path);
+        putDataMapReq.getDataMap().putInt(key, data);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+    }
+
+    private void sendBoolToPhone(String path, String key, Boolean data){
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create(path);
         putDataMapReq.getDataMap().putBoolean(key, data);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
@@ -141,8 +177,20 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     }
 
     @Override
-    public void onDataChanged(DataEventBuffer dataEventBuffer) {
+    public void onDataChanged(DataEventBuffer dataEvents) {
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == DataEvent.TYPE_CHANGED) {
+                // DataItem changed
+                DataItem item = event.getDataItem();
+                if (item.getUri().getPath().compareTo("/MusicVolume") == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    volumeSeekBar.setProgress(dataMap.getInt(VOLUME_KEY));
 
+                }
+            } else if (event.getType() == DataEvent.TYPE_DELETED) {
+                // DataItem deleted
+            }
+        }
     }
 
     @Override

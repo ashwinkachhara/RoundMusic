@@ -3,6 +3,7 @@ package com.ashwinkachhara.circularseekbartest;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -59,12 +60,15 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     private boolean musicBound=false;
 
     private MusicController controller;
+    private AudioManager audioManager;
+    int maxVol;
 
     private boolean paused=false, playbackPaused=false;
 
     GoogleApiClient mApiClient;
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
+    private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         mApiClient.connect();
 
         sendSongListToWear();
+
+        sendVolumeToWear(getCurrentPhoneVolume());
     }
 
     @Override
@@ -151,6 +157,25 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    public int getCurrentPhoneVolume(){
+        audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        int vol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        Log.d("VOLUME", vol + " " + maxVol + " ");
+        return vol*100/maxVol;
+    }
+
+    public void setCurrentVolume(int vol){
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,vol*maxVol/100,0);
+    }
+
+    public void sendVolumeToWear(int volume){
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/MusicVolume");
+        putDataMapReq.getDataMap().putInt(VOLUME_KEY, volume);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
     }
 
     public void sendSongListToWear() {
@@ -440,6 +465,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                     playNext();
                 } else if (item.getUri().getPath().compareTo("/PrevSong") == 0){
                     playPrev();
+                } else if (item.getUri().getPath().compareTo("/MusicVolume") == 0){
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    setCurrentVolume(dataMap.getInt(VOLUME_KEY));
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted
