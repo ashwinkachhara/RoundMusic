@@ -41,4 +41,18 @@
         android:layout_marginTop="80px"
         android:layout_marginLeft="87px"/>
 
+    <com.devadvance.circularseekbar.CircularSeekBar
+        android:id="@+id/circularSeekBar1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        app:start_angle="272.5"
+        app:end_angle="267.5"
+        app:use_custom_radii="true"
+        app:circle_x_radius="300dp"
+        app:circle_y_radius="300dp"
+        app:circle_stroke_width="1dp"
+        app:pointer_radius="3dp"
+        app:pointer_halo_width="3dp"/>
+
 </android.support.wearable.view.BoxInsetLayout>

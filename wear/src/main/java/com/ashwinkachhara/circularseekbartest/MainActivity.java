@@ -87,7 +87,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
+        mApiClient.connect();
         MainActivity.this.startActivity(new Intent(MainActivity.this,NowPlayingActivity.class));
 
     }

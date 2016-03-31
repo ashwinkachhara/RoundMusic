@@ -32,6 +32,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
@@ -43,7 +48,8 @@ import java.util.Comparator;
 import android.widget.MediaController.MediaPlayerControl;
 
 
-public class MainActivity extends AppCompatActivity implements MediaPlayerControl {
+public class MainActivity extends AppCompatActivity implements MediaPlayerControl, DataApi.DataListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private ArrayList<Song> songList;
     private ArrayList<String> songTitles;
@@ -101,29 +107,50 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
         setController();
 
-        mApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
-                        Log.d("GOOGAPI", "onConnected: " + bundle);
-                    }
+//        mApiClient = new GoogleApiClient.Builder(this)
+//                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+//                    @Override
+//                    public void onConnected(Bundle bundle) {
+//                        Log.d("GOOGAPI", "onConnected: " + bundle);
+//                    }
+//
+//                    @Override
+//                    public void onConnectionSuspended(int i) {
+//                        Log.d("GOOGAPI", "onConnectionSuspended: " + i);
+//                    }
+//                })
+//                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+//                    @Override
+//                    public void onConnectionFailed(ConnectionResult connectionResult) {
+//                        Log.d("GOOGAPI", "onConnectionFailed " + connectionResult);
+//                    }
+//                })
+//                .addApi(Wearable.API)
+//                .build();
 
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        Log.d("GOOGAPI", "onConnectionSuspended: " + i);
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(ConnectionResult connectionResult) {
-                        Log.d("GOOGAPI", "onConnectionFailed " + connectionResult);
-                    }
-                })
+        mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .build();
         mApiClient.connect();
 
         sendSongListToWear();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Wearable.DataApi.addListener(mApiClient, this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 
     public void sendSongListToWear() {
@@ -396,5 +423,27 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     @Override
     public int getAudioSessionId() {
         return 0;
+    }
+
+    @Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == DataEvent.TYPE_CHANGED) {
+                // DataItem changed
+                DataItem item = event.getDataItem();
+                if (item.getUri().getPath().compareTo("/PlayToggle") == 0) {
+                    if (isPlaying())
+                        pause();
+                    else
+                        start();
+                } else if (item.getUri().getPath().compareTo("/NextSong") == 0){
+                    playNext();
+                } else if (item.getUri().getPath().compareTo("/PrevSong") == 0){
+                    playPrev();
+                }
+            } else if (event.getType() == DataEvent.TYPE_DELETED) {
+                // DataItem deleted
+            }
+        }
     }
 }
