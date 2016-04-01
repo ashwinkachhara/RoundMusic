@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
+import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -37,6 +38,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
 
     ImageView playPauseB, prevB, nextB, searchB;
     CircularSeekBar volumeSeekBar;
+    DonutProgress songProgressBar;
 
     private GoogleApiClient mApiClient;
 
@@ -46,6 +48,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
     private static final String INITVOLUME_KEY = "com.ashwinkachhara.key.initvolume";
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
+    private static final String SONGPROGRESS_KEY = "com.ashwinkachhara.key.songprogress";
 
     Boolean playToggleState = false;
     Boolean nextSongState = false;
@@ -64,6 +67,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         nextB = (ImageView) findViewById(R.id.nextButton);
         searchB = (ImageView) findViewById(R.id.searchButton);
         volumeSeekBar = (CircularSeekBar) findViewById(R.id.nowPlayingVolumeSeek);
+        songProgressBar = (DonutProgress) findViewById(R.id.nowPlayingSongProgressBar);
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -197,6 +201,12 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     int vol = Integer.parseInt(dataMap.getStringArrayList(INITVOLUME_KEY).get(0));
                     volumeSeekBar.setProgress(vol);
+
+                }
+                else if (item.getUri().getPath().compareTo("/SongProgress") == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    int prog = dataMap.getInt(SONGPROGRESS_KEY);
+                    songProgressBar.setProgress(prog);
 
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {

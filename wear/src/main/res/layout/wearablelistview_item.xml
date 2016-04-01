@@ -10,9 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="16dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed-light"
-        android:lineSpacingExtra="-4sp"
         android:textColor="@color/white"
-        android:textSize="16sp"/>
+        android:textSize="20sp" />
 </com.ashwinkachhara.circularseekbartest.WearableListItemLayout>

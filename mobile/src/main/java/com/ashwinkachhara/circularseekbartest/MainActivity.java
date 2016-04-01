@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import android.os.Handler;
+
 import android.widget.MediaController.MediaPlayerControl;
 
 
@@ -72,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
     private static final String WEARSONGPICK_KEY = "com.ashwinkachhara.key.wearsongpick";
+    private static final String SONGPROGRESS_KEY = "com.ashwinkachhara.key.songprogress";
+
+    Handler songProgressUpdHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +146,15 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                 .addOnConnectionFailedListener(this)
                 .build();
         mApiClient.connect();
+
+        songProgressUpdHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isPlaying())
+                    sendSongProgressToWear();
+                songProgressUpdHandler.postDelayed(this, 5000);
+            }
+        }, 5000);
     }
 
     @Override
@@ -169,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     }
 
     public void setCurrentVolume(int vol){
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,vol*maxVol/100,0);
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, vol * maxVol / 100, 0);
     }
 
     public void sendVolumeToWear(int volume){
@@ -180,6 +194,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/InitMusicVolume");
         putDataMapReq.getDataMap().putStringArrayList(INITVOLUME_KEY, vol);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+    }
+
+    public void sendSongProgressToWear(){
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/SongProgress");
+        putDataMapReq.getDataMap().putInt(SONGPROGRESS_KEY, getCurrentPosition()*100/getDuration());
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
     }
