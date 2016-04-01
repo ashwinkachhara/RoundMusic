@@ -14,7 +14,8 @@
         android:theme="@android:style/Theme.DeviceDefault">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,6 +30,7 @@
         <activity
             android:name=".NowPlayingActivity"
             android:label="@string/title_activity_now_playing"
+            android:launchMode="singleInstance"
             android:theme="@android:style/Theme.DeviceDefault.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -68,7 +68,10 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     GoogleApiClient mApiClient;
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
+    private static final String INITVOLUME_KEY = "com.ashwinkachhara.key.initvolume";
     private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
+    private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
+    private static final String WEARSONGPICK_KEY = "com.ashwinkachhara.key.wearsongpick";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,15 +141,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                 .addOnConnectionFailedListener(this)
                 .build();
         mApiClient.connect();
-
-        sendSongListToWear();
-
-        sendVolumeToWear(getCurrentPhoneVolume());
     }
 
     @Override
     public void onConnected(Bundle bundle) {
         Wearable.DataApi.addListener(mApiClient, this);
+        sendSongListToWear();
+        sendVolumeToWear(getCurrentPhoneVolume());
     }
 
     @Override
@@ -172,24 +173,34 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     }
 
     public void sendVolumeToWear(int volume){
-        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/MusicVolume");
-        putDataMapReq.getDataMap().putInt(VOLUME_KEY, volume);
+//        Wearable.DataApi.deleteDataItems((mApiClient),VOLUME_KEY);
+        ArrayList<String> vol = new ArrayList<>();
+        vol.add(Integer.toString(volume));
+        vol.add(Long.toString(System.currentTimeMillis()));
+
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/InitMusicVolume");
+        putDataMapReq.getDataMap().putStringArrayList(INITVOLUME_KEY, vol);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
     }
 
     public void sendSongListToWear() {
+        Log.d("SENDSONGS", "Sending Songs!");
+        songTitles.remove(songTitles.size() - 1);
+        songTitles.add(Long.toString(System.currentTimeMillis()));
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/SongList");
         putDataMapReq.getDataMap().putStringArrayList(SONG_KEY,songTitles);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+        Log.d("SENDSONGS", pendingResult.toString());
 
     }
 
     public void getSongTitles(){
-        for (int i=0; i<songList.size();i++){
+        for (int i=0; i<songList.size();i++) {
             songTitles.add(songList.get(i).getTitle());
         }
+        songTitles.add(Long.toString(System.currentTimeMillis()));
     }
 
     //connect to the service
@@ -300,6 +311,16 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         Log.d("SONG", Integer.toString(songid));
         Log.d("SONG", Boolean.toString(musicSrv == null));
         musicSrv.setSong(songid);
+        musicSrv.playSong();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
+
+    public void songPickedFromWear(int tag){
+        musicSrv.setSong(tag);
         musicSrv.playSong();
         if(playbackPaused){
             setController();
@@ -468,6 +489,21 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                 } else if (item.getUri().getPath().compareTo("/MusicVolume") == 0){
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     setCurrentVolume(dataMap.getInt(VOLUME_KEY));
+                } else if (item.getUri().getPath().compareTo("/WearActivity") == 0){
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    int activity = dataMap.getInt(WEARACTIVITY_KEY);
+                    switch(activity){
+                        case 0:
+                            sendSongListToWear();
+                        case 1:
+                            sendVolumeToWear(getCurrentPhoneVolume());
+                    }
+                } else if (item.getUri().getPath().compareTo("/PickSongFromWear") == 0){
+                    Log.d("SONGFROMWEAR", "Got it");
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    int songid = dataMap.getInt(WEARSONGPICK_KEY);
+                    if (songid>=0)
+                        songPickedFromWear(songid);
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted

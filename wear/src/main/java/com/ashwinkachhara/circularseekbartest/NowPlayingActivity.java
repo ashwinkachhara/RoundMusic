@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,6 +44,8 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     private static final String NEXTSONG_KEY = "com.ashwinkachhara.key.nextsong";
     private static final String PREVSONG_KEY = "com.ashwinkachhara.key.prevsong";
     private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
+    private static final String INITVOLUME_KEY = "com.ashwinkachhara.key.initvolume";
+    private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
 
     Boolean playToggleState = false;
     Boolean nextSongState = false;
@@ -97,6 +100,11 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
             @Override
             public void onClick(View v) {
                 NowPlayingActivity.this.startActivity(new Intent(NowPlayingActivity.this,MainActivity.class));
+
+                Intent listint = new Intent(NowPlayingActivity.this, MainActivity.class);
+                listint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                listint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                NowPlayingActivity.this.startActivity(listint);
             }
         });
 
@@ -169,6 +177,8 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     @Override
     public void onConnected(Bundle bundle) {
         Wearable.DataApi.addListener(mApiClient, this);
+        sendIntToPhone("/WearActivity",WEARACTIVITY_KEY,1);
+        // 0 = MainActivity, 1 = NowPlayingActivity
     }
 
     @Override
@@ -178,13 +188,15 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
+//        Log.d("NPDATACHNG", "Data changed");
         for (DataEvent event : dataEvents) {
             if (event.getType() == DataEvent.TYPE_CHANGED) {
                 // DataItem changed
                 DataItem item = event.getDataItem();
-                if (item.getUri().getPath().compareTo("/MusicVolume") == 0) {
+                if (item.getUri().getPath().compareTo("/InitMusicVolume") == 0) {
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
-                    volumeSeekBar.setProgress(dataMap.getInt(VOLUME_KEY));
+                    int vol = Integer.parseInt(dataMap.getStringArrayList(INITVOLUME_KEY).get(0));
+                    volumeSeekBar.setProgress(vol);
 
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {

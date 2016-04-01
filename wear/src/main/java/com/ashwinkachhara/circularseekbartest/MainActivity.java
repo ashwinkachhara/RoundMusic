@@ -17,12 +17,15 @@ import android.widget.TextView;
 import com.devadvance.circularseekbar.CircularSeekBar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
@@ -37,12 +40,15 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     public CircularButton playPauseButton;
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
+    private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
+    private static final String WEARSONGPICK_KEY = "com.ashwinkachhara.key.wearsongpick";
 
     private GoogleApiClient mApiClient;
 
     private ArrayList<String> songTitles;
 
     private boolean GOT_SONGS = false;
+    private boolean FIRST_DONE = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +98,13 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 
     }
 
+    private void sendIntToPhone(String path, String key, Integer data){
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(path);
+        putDataMapReq.getDataMap().putInt(key, data);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -101,6 +114,8 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     @Override
     public void onConnected(Bundle bundle) {
         Wearable.DataApi.addListener(mApiClient, this);
+        Log.d("APICONN", "I am connected!");
+        sendIntToPhone("/WearActivity",WEARACTIVITY_KEY,0);
     }
 
     @Override
@@ -113,20 +128,28 @@ public class MainActivity extends Activity implements WearableListView.ClickList
         super.onPause();
         Wearable.DataApi.removeListener(mApiClient, this);
         mApiClient.disconnect();
+        sendIntToPhone("/PickSongFromWear", WEARSONGPICK_KEY, -100);
     }
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
+//        Log.d("DATACHNG", "Data changed");
         for (DataEvent event : dataEvents) {
             if (event.getType() == DataEvent.TYPE_CHANGED) {
                 // DataItem changed
                 DataItem item = event.getDataItem();
                 if (item.getUri().getPath().compareTo("/SongList") == 0) {
+                    Log.d("DATACHNG", "Some Songs");
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     songTitles = dataMap.getStringArrayList(SONG_KEY);
                     GOT_SONGS = true;
                     loadAdapter();
-                    MainActivity.this.startActivity(new Intent(MainActivity.this, NowPlayingActivity.class));
+//                    if (!FIRST_DONE) {
+//                        FIRST_DONE = true;
+//                        Intent npint = new Intent(MainActivity.this, NowPlayingActivity.class);
+//                        npint.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//                        MainActivity.this.startActivity(npint);
+//                    }
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted
@@ -142,8 +165,8 @@ public class MainActivity extends Activity implements WearableListView.ClickList
         //items.add(new SettingsItems(R.drawable.ic_color, getString(R.string.theme)));
         if (GOT_SONGS)
             listView.setAdapter(new com.ashwinkachhara.circularseekbartest.Adapter(this,songTitles));
-        else
-            listView.setAdapter(new com.ashwinkachhara.circularseekbartest.Adapter(this, items));
+//        else
+//            listView.setAdapter(new com.ashwinkachhara.circularseekbartest.Adapter(this, items));
 
         listView.setClickListener(this);
     }
@@ -152,6 +175,14 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     public void onClick(WearableListView.ViewHolder v) {
         Integer tag = (Integer) v.itemView.getTag();
         // use this data to complete some action ...
+        Log.d("SONGPICKED", "Picked " + tag);
+        sendIntToPhone("/PickSongFromWear", WEARSONGPICK_KEY, tag);
+
+        Intent npint = new Intent(MainActivity.this, NowPlayingActivity.class);
+        npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        MainActivity.this.startActivity(npint);
+
     }
 
     @Override
