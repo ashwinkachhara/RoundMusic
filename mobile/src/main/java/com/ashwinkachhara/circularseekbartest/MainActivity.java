@@ -364,6 +364,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     }
 
     public void getSongList() {
+        songList.clear();
         //retrieve song info
         ContentResolver musicResolver = getContentResolver();
         Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;

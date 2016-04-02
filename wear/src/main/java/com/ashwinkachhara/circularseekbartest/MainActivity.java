@@ -36,7 +36,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 
     private WearableListView listView;
     public AudioManager audioManager;
-    public CircularSeekBar seekBar;
+    public CircularSeekBar alphabetSeekBar;
     public CircularButton playPauseButton;
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
@@ -46,6 +46,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     private GoogleApiClient mApiClient;
 
     private ArrayList<String> songTitles;
+    private com.ashwinkachhara.circularseekbartest.Adapter songListAdapter;
 
     private boolean GOT_SONGS = false;
     private boolean FIRST_DONE = false;
@@ -61,7 +62,23 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                 listView = (WearableListView) stub.findViewById(R.id.sample_list_view);
                 loadAdapter();
 //                audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-//                seekBar = (CircularSeekBar) findViewById(R.id.circularSeekBar1);
+                alphabetSeekBar = (CircularSeekBar) findViewById(R.id.alphabetScrollBar);
+                alphabetSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
+                        listView.smoothScrollToPosition(songListAdapter.getPositionForSection(progress));
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(CircularSeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(CircularSeekBar seekBar) {
+
+                    }
+                });
 //                int vol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 //                int maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 //                Log.d("VOLUME", vol + " " + maxVol + " " + (seekBar != null));
@@ -164,8 +181,10 @@ public class MainActivity extends Activity implements WearableListView.ClickList
             items.add("Item "+i);
         }
         //items.add(new SettingsItems(R.drawable.ic_color, getString(R.string.theme)));
-        if (GOT_SONGS)
-            listView.setAdapter(new com.ashwinkachhara.circularseekbartest.Adapter(this,songTitles));
+        if (GOT_SONGS) {
+            songListAdapter = new com.ashwinkachhara.circularseekbartest.Adapter(this, songTitles);
+            listView.setAdapter(songListAdapter);
+        }
 //        else
 //            listView.setAdapter(new com.ashwinkachhara.circularseekbartest.Adapter(this, items));
 

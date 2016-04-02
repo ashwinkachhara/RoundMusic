@@ -31,7 +31,7 @@
         app:donut_finished_color="#c8ffa500"
         app:donut_unfinished_color="#00000000"
         app:donut_max="100"
-        app:donut_progress="70"/>
+        app:donut_progress="0"/>
 
     <ImageView
         android:layout_width="wrap_content"
