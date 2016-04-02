@@ -142,6 +142,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                     Log.d("DATACHNG", "Some Songs");
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     songTitles = dataMap.getStringArrayList(SONG_KEY);
+                    songTitles.remove(songTitles.size()-1);
                     GOT_SONGS = true;
                     loadAdapter();
 //                    if (!FIRST_DONE) {
@@ -179,6 +180,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
         sendIntToPhone("/PickSongFromWear", WEARSONGPICK_KEY, tag);
 
         Intent npint = new Intent(MainActivity.this, NowPlayingActivity.class);
+        npint.putExtra("SONGNAME",songTitles.get(tag));
         npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         MainActivity.this.startActivity(npint);

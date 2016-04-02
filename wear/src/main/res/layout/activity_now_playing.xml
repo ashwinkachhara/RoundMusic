@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.wearable.view.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.wearable.view.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
@@ -9,9 +10,20 @@
     tools:context="com.ashwinkachhara.circularseekbartest.NowPlayingActivity"
     tools:deviceIds="wear">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello, World!"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/nowPlayingSongName"
+        android:textColor="#ffffffff"
+        android:layout_marginTop="40px"
+        app:layout_box="all"
+        />
+
     <com.github.lzyzsd.circleprogress.DonutProgress
-        android:layout_marginLeft="54dp"
-        android:layout_marginTop="49dp"
+        android:layout_marginLeft="53dp"
+        android:layout_marginTop="47dp"
         android:id="@+id/nowPlayingSongProgressBar"
         android:layout_width="160px"
         android:layout_height="160px"
@@ -65,7 +77,12 @@
         app:circle_y_radius="300dp"
         app:circle_stroke_width="1dp"
         app:pointer_radius="3dp"
-        app:pointer_halo_width="3dp"/>
+        app:pointer_halo_width="3dp"
+        app:pointer_color="#ffffa500"
+        app:pointer_halo_color="#aaffa500"
+        app:pointer_halo_color_ontouch="#aaffa500"
+        app:circle_colour="#640097a7"
+        app:circle_progress_color="#6400e8f4"/>
 
 
 

@@ -59,7 +59,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/alphabet"
+        android:src="@drawable/smallalphabet"
         />
 
     <com.devadvance.circularseekbar.CircularSeekBar
@@ -74,5 +74,11 @@
         app:circle_y_radius="300dp"
         app:circle_stroke_width="1dp"
         app:pointer_radius="3dp"
-        app:pointer_halo_width="3dp"/>
+        app:pointer_halo_width="3dp"
+        app:max="25"
+        app:pointer_color="#ffffa500"
+        app:pointer_halo_color="#aaffa500"
+        app:pointer_halo_color_ontouch="#aaffa500"
+        app:circle_colour="#00000000"
+        app:circle_progress_color="#6400e8f4"/>
 </android.support.wearable.view.BoxInsetLayout>

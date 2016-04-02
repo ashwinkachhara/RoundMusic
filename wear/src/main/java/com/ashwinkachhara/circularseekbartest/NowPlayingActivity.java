@@ -39,6 +39,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     ImageView playPauseB, prevB, nextB, searchB;
     CircularSeekBar volumeSeekBar;
     DonutProgress songProgressBar;
+    TextView songNameText;
 
     private GoogleApiClient mApiClient;
 
@@ -68,6 +69,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         searchB = (ImageView) findViewById(R.id.searchButton);
         volumeSeekBar = (CircularSeekBar) findViewById(R.id.nowPlayingVolumeSeek);
         songProgressBar = (DonutProgress) findViewById(R.id.nowPlayingSongProgressBar);
+        songNameText = (TextView) findViewById(R.id.nowPlayingSongName);
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -130,6 +132,8 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
 
             }
         });
+
+        songNameText.setText(getIntent().getExtras().getString("SONGNAME"));
     }
 
     private void sendIntToPhone(String path, String key, Integer data){
