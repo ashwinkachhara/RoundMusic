@@ -10,9 +10,11 @@ import android.support.wearable.view.CircularButton;
 import android.support.wearable.view.WatchViewStub;
 import android.support.wearable.view.WearableListView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.devadvance.circularseekbar.CircularSeekBar;
 import com.google.android.gms.common.ConnectionResult;
@@ -45,7 +47,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 
     private GoogleApiClient mApiClient;
 
-    private ArrayList<String> songTitles;
+    protected ArrayList<String> songTitles;
     private com.ashwinkachhara.circularseekbartest.Adapter songListAdapter;
 
     private boolean GOT_SONGS = false;
@@ -66,12 +68,21 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                 alphabetSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-                        listView.smoothScrollToPosition(songListAdapter.getPositionForSection(progress));
+                        listView.scrollToPosition(songListAdapter.getPositionForSection(progress));
+
                     }
 
                     @Override
                     public void onStopTrackingTouch(CircularSeekBar seekBar) {
+                        int progress = seekBar.getProgress();
+                        Context context = getApplicationContext();
+                        String text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                        Log.d("SCROLL", text.substring(progress,progress+1));
+                        int duration = Toast.LENGTH_SHORT;
 
+                        Toast toast = Toast.makeText(context, text.substring(progress,progress+1), duration);
+                        toast.setGravity(Gravity.CENTER,0,0);
+                        toast.show();
                     }
 
                     @Override
@@ -199,7 +210,8 @@ public class MainActivity extends Activity implements WearableListView.ClickList
         sendIntToPhone("/PickSongFromWear", WEARSONGPICK_KEY, tag);
 
         Intent npint = new Intent(MainActivity.this, NowPlayingActivity.class);
-        npint.putExtra("SONGNAME",songTitles.get(tag));
+        npint.putExtra("SONGLIST",songTitles);
+        npint.putExtra("SONGNAME",tag);
         npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         MainActivity.this.startActivity(npint);

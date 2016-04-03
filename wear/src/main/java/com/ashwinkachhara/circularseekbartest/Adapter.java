@@ -23,7 +23,8 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
     private final Context mContext;
     private final LayoutInflater mInflater;
 
-    private HashMap<String,Integer> alphaIndexer;
+    protected HashMap<String,Integer> alphaIndexer;
+    protected Set<String> sectionLetters;
     private String[] sections;
 
     // Provide a suitable constructor (depends on the kind of dataset)
@@ -39,7 +40,7 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
             if (!alphaIndexer.containsKey(s))
                 alphaIndexer.put(s, i);
         }
-        Set<String> sectionLetters = alphaIndexer.keySet();
+        sectionLetters = alphaIndexer.keySet();
         ArrayList<String> sectionList = new ArrayList<String>(sectionLetters);
         Collections.sort(sectionList);
         sections = new String[sectionList.size()];

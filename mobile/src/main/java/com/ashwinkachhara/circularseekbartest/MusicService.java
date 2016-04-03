@@ -29,13 +29,15 @@ public class MusicService extends Service implements
     //song list
     private ArrayList<Song> songs;
     //current position
-    private int songPosn;
+    protected int songPosn;
 
     private String songTitle="";
     private static final int NOTIFY_ID=1;
 
     private boolean shuffle=false;
     private Random rand;
+
+    protected boolean JUST_COMPLETED = false;
 
     private final IBinder musicBind = new MusicBinder();
 
@@ -142,6 +144,7 @@ public class MusicService extends Service implements
         if(player.getCurrentPosition()>0){
             mp.reset();
             playNext();
+            JUST_COMPLETED = true;
         }
     }
 

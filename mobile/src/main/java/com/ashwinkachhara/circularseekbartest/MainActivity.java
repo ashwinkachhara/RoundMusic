@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
     private static final String WEARSONGPICK_KEY = "com.ashwinkachhara.key.wearsongpick";
     private static final String SONGPROGRESS_KEY = "com.ashwinkachhara.key.songprogress";
+    private static final String CURRENTPLAYINGSONG_KEY = "com.ashwinkachhara.key.currentplayingsong";
 
     Handler songProgressUpdHandler = new Handler();
 
@@ -150,8 +151,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         songProgressUpdHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (isPlaying())
+                if (isPlaying()) {
                     sendSongProgressToWear();
+                    if (musicSrv.JUST_COMPLETED){
+                        sendCurrentPlayingSongToWear();
+                        musicSrv.JUST_COMPLETED = false;
+                    }
+                }
                 songProgressUpdHandler.postDelayed(this, 5000);
             }
         }, 5000);
@@ -194,6 +200,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/InitMusicVolume");
         putDataMapReq.getDataMap().putStringArrayList(INITVOLUME_KEY, vol);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+    }
+
+    public void sendCurrentPlayingSongToWear(){
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/CurrentPlayingSong");
+        putDataMapReq.getDataMap().putInt(CURRENTPLAYINGSONG_KEY, musicSrv.songPosn);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
     }
@@ -517,8 +530,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                     switch(activity){
                         case 0:
                             sendSongListToWear();
+                            break;
                         case 1:
                             sendVolumeToWear(getCurrentPhoneVolume());
+                            break;
+                        case 2:
+                            sendSongListToWear();
+                            break;
                     }
                 } else if (item.getUri().getPath().compareTo("/PickSongFromWear") == 0){
                     Log.d("SONGFROMWEAR", "Got it");

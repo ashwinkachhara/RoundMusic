@@ -25,6 +25,7 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -40,6 +41,8 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     CircularSeekBar volumeSeekBar;
     DonutProgress songProgressBar;
     TextView songNameText;
+    protected ArrayList<String> songTitles;
+    private int currentSongId;
 
     private GoogleApiClient mApiClient;
 
@@ -50,6 +53,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     private static final String INITVOLUME_KEY = "com.ashwinkachhara.key.initvolume";
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
     private static final String SONGPROGRESS_KEY = "com.ashwinkachhara.key.songprogress";
+    private static final String CURRENTPLAYINGSONG_KEY = "com.ashwinkachhara.key.currentplayingsong";
 
     Boolean playToggleState = false;
     Boolean nextSongState = false;
@@ -91,21 +95,30 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
             public void onClick(View v) {
                 sendBoolToPhone("/PrevSong",PREVSONG_KEY,prevSongState);
                 prevSongState = ! prevSongState;
+                currentSongId--;
+                if (currentSongId == -1)
+                    currentSongId += 0;
+                songNameText.setText(songTitles.get(currentSongId));
             }
         });
 
         nextB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendBoolToPhone("/NextSong",NEXTSONG_KEY,nextSongState);
+                sendBoolToPhone("/NextSong", NEXTSONG_KEY, nextSongState);
                 nextSongState = ! nextSongState;
+                currentSongId++;
+                if (currentSongId == songTitles.size())
+                    currentSongId = songTitles.size()-1;
+                songNameText.setText(songTitles.get(currentSongId));
+
             }
         });
 
         searchB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NowPlayingActivity.this.startActivity(new Intent(NowPlayingActivity.this,MainActivity.class));
+                NowPlayingActivity.this.startActivity(new Intent(NowPlayingActivity.this, MainActivity.class));
 
                 Intent listint = new Intent(NowPlayingActivity.this, MainActivity.class);
                 listint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -132,8 +145,9 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
 
             }
         });
-
-        songNameText.setText(getIntent().getExtras().getString("SONGNAME"));
+        currentSongId = getIntent().getExtras().getInt("SONGNAME");
+        songTitles = getIntent().getExtras().getStringArrayList("SONGLIST");
+        songNameText.setText(songTitles.get(currentSongId));
     }
 
     private void sendIntToPhone(String path, String key, Integer data){
@@ -206,12 +220,15 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
                     int vol = Integer.parseInt(dataMap.getStringArrayList(INITVOLUME_KEY).get(0));
                     volumeSeekBar.setProgress(vol);
 
-                }
-                else if (item.getUri().getPath().compareTo("/SongProgress") == 0) {
+                } else if (item.getUri().getPath().compareTo("/SongProgress") == 0) {
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     int prog = dataMap.getInt(SONGPROGRESS_KEY);
                     songProgressBar.setProgress(prog);
-
+                } else if (item.getUri().getPath().compareTo("/CurrentPlayingSong") == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    int prog = dataMap.getInt(CURRENTPLAYINGSONG_KEY);
+                    currentSongId = prog;
+                    songNameText.setText(songTitles.get(currentSongId));
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted
