@@ -8,7 +8,14 @@
     android:layout_height="match_parent"
     android:background="#000000"
     tools:context="com.ashwinkachhara.circularseekbartest.NowPlayingActivity"
-    tools:deviceIds="wear">
+    tools:deviceIds="wear"
+    >
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/albumart"
+        android:alpha="0.5"
+        />
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,35 +26,49 @@
         android:textColor="#ffffffff"
         android:layout_marginTop="40px"
         app:layout_box="all"
+        android:textSize="20sp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello, World!"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/nowPlayingSongArtist"
+        android:textColor="#ffffffff"
+        android:layout_marginTop="75px"
+        app:layout_box="all"
+        android:textSize="15sp"
         />
 
     <com.github.lzyzsd.circleprogress.DonutProgress
-        android:layout_marginLeft="53dp"
-        android:layout_marginTop="47dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="42dp"
         android:id="@+id/nowPlayingSongProgressBar"
-        android:layout_width="160px"
-        android:layout_height="160px"
+        android:layout_width="200px"
+        android:layout_height="200px"
         app:donut_text=""
         app:donut_finished_color="#c8ffa500"
         app:donut_unfinished_color="#00000000"
         app:donut_max="100"
+        app:donut_finished_stroke_width="40dp"
         app:donut_progress="0"/>
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:src="@drawable/prev"
         android:id="@+id/prevButton"
         android:layout_marginTop="140px"
-        android:layout_marginLeft="40px"/>
+        android:layout_marginLeft="35px"/>
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:src="@drawable/next"
         android:id="@+id/nextButton"
         android:layout_marginTop="140px"
-        android:layout_marginLeft="220px"/>
+        android:layout_marginLeft="243px"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -60,9 +81,9 @@
     <ImageView
         android:layout_width="120px"
         android:layout_height="120px"
-        android:src="@drawable/playpause"
+        android:src="@drawable/play"
         android:id="@+id/playPauseButton"
-        android:layout_marginTop="95px"
+        android:layout_marginTop="107px"
         android:layout_marginLeft="100px"/>
 
     <com.devadvance.circularseekbar.CircularSeekBar

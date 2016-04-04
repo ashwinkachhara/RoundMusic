@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import java.util.Set;
  */
 public final class Adapter extends WearableListView.Adapter implements SectionIndexer{
     private ArrayList<String> mDataset;
+    private ArrayList<String> mArtists;
     private final Context mContext;
     private final LayoutInflater mInflater;
 
@@ -28,11 +31,12 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
     private String[] sections;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public Adapter(Context context, ArrayList<String> dataset) {
+    public Adapter(Context context, ArrayList<String> dataset, ArrayList<String> artists) {
         alphaIndexer = new HashMap<String, Integer>();
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mDataset = dataset;
+        mArtists = artists;
 
         for (int i = 0; i < mDataset.size(); i++)
         {
@@ -60,16 +64,27 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
 
     @Override
     public int getSectionForPosition(int position) {
-        return 0;
+        int i;
+        for (i=0;i<alphaIndexer.size();i++){
+            if (position < alphaIndexer.get(sections[i])) {
+                if (mDataset.get(position).charAt(0) == mDataset.get(alphaIndexer.get(sections[i])).charAt(0))
+                    return i;
+                else
+                    return i-1;
+            }
+        }
+        return i-1;
     }
 
     // Provide a reference to the type of views you're using
     public static class ItemViewHolder extends WearableListView.ViewHolder {
         private TextView textView;
+        private TextView artistView;
         public ItemViewHolder(View itemView) {
             super(itemView);
             // find the text view within the custom item's layout
             textView = (TextView) itemView.findViewById(R.id.name);
+            artistView = (TextView) itemView.findViewById(R.id.artist);
         }
     }
 
@@ -91,7 +106,9 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
         // retrieve the text view
         ItemViewHolder itemHolder = (ItemViewHolder) holder;
         TextView view = itemHolder.textView;
+        TextView artistView = itemHolder.artistView;
         // replace text contents
+        artistView.setText(mArtists.get(position));
         view.setText(mDataset.get(position));
         // replace list item's metadata
         holder.itemView.setTag(position);

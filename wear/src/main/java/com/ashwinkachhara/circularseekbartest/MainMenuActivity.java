@@ -38,9 +38,11 @@ public class MainMenuActivity extends WearableActivity implements WearableListVi
     private GoogleApiClient mApiClient;
 
     private ArrayList<String> songTitles;
+    private ArrayList<String> songArtists;
 
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
+    private static final String ARTISTS_KEY = "com.ashwinkachhara.key.artists";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +98,9 @@ public class MainMenuActivity extends WearableActivity implements WearableListVi
             case 0:
                 Intent npint = new Intent(MainMenuActivity.this, NowPlayingActivity.class);
                 npint.putExtra("SONGLIST",songTitles);
-                npint.putExtra("SONGNAME",1);
+                npint.putExtra("SONGARTISTS", songArtists);
+                npint.putExtra("SONGNAME",0);
+                npint.putExtra("PLAYING",0);
                 npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 MainMenuActivity.this.startActivity(npint);
@@ -144,6 +148,11 @@ public class MainMenuActivity extends WearableActivity implements WearableListVi
 //                        npint.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 //                        MainActivity.this.startActivity(npint);
 //                    }
+                } else if (item.getUri().getPath().compareTo("/ArtistsList") == 0){
+//                    Log.d("DATACHNG", "Some Songs");
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    songArtists = dataMap.getStringArrayList(ARTISTS_KEY);
+                    songArtists.remove(songArtists.size() - 1);
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted

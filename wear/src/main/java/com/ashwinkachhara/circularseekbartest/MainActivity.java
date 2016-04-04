@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.wearable.view.CircularButton;
 import android.support.wearable.view.WatchViewStub;
 import android.support.wearable.view.WearableListView;
@@ -42,16 +43,20 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     public CircularButton playPauseButton;
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
+    private static final String ARTISTS_KEY = "com.ashwinkachhara.key.artists";
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
     private static final String WEARSONGPICK_KEY = "com.ashwinkachhara.key.wearsongpick";
 
     private GoogleApiClient mApiClient;
 
     protected ArrayList<String> songTitles;
+    protected ArrayList<String> songArtists;
     private com.ashwinkachhara.circularseekbartest.Adapter songListAdapter;
 
     private boolean GOT_SONGS = false;
+    private boolean GOT_ARTISTS = false;
     private boolean FIRST_DONE = false;
+    private boolean REGULARSCROLLED = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,13 +67,24 @@ public class MainActivity extends Activity implements WearableListView.ClickList
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 listView = (WearableListView) stub.findViewById(R.id.sample_list_view);
+                listView.addOnCentralPositionChangedListener(new WearableListView.OnCentralPositionChangedListener() {
+                    @Override
+                    public void onCentralPositionChanged(int i) {
+                        alphabetSeekBar.setProgress(songListAdapter.getSectionForPosition(i));
+                        REGULARSCROLLED = true;
+                    }
+                });
                 loadAdapter();
+//                listView
 //                audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
                 alphabetSeekBar = (CircularSeekBar) findViewById(R.id.alphabetScrollBar);
                 alphabetSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-                        listView.scrollToPosition(songListAdapter.getPositionForSection(progress));
+                        if (REGULARSCROLLED)
+                            REGULARSCROLLED = false;
+                        else
+                            listView.scrollToPosition(songListAdapter.getPositionForSection(progress));
 
                     }
 
@@ -124,6 +140,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
         mApiClient.connect();
 
 
+
     }
 
     private void sendIntToPhone(String path, String key, Integer data){
@@ -167,7 +184,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                 // DataItem changed
                 DataItem item = event.getDataItem();
                 if (item.getUri().getPath().compareTo("/SongList") == 0) {
-                    Log.d("DATACHNG", "Some Songs");
+//                    Log.d("DATACHNG", "Some Songs");
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     songTitles = dataMap.getStringArrayList(SONG_KEY);
                     songTitles.remove(songTitles.size()-1);
@@ -179,6 +196,13 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 //                        npint.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 //                        MainActivity.this.startActivity(npint);
 //                    }
+                } else if (item.getUri().getPath().compareTo("/ArtistsList") == 0){
+//                    Log.d("DATACHNG", "Some Songs");
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    songArtists = dataMap.getStringArrayList(ARTISTS_KEY);
+                    songArtists.remove(songArtists.size()-1);
+                    GOT_ARTISTS = true;
+                    loadAdapter();
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted
@@ -192,8 +216,8 @@ public class MainActivity extends Activity implements WearableListView.ClickList
             items.add("Item "+i);
         }
         //items.add(new SettingsItems(R.drawable.ic_color, getString(R.string.theme)));
-        if (GOT_SONGS) {
-            songListAdapter = new com.ashwinkachhara.circularseekbartest.Adapter(this, songTitles);
+        if (GOT_SONGS && GOT_ARTISTS) {
+            songListAdapter = new com.ashwinkachhara.circularseekbartest.Adapter(this, songTitles, songArtists);
             listView.setAdapter(songListAdapter);
         }
 //        else
@@ -211,7 +235,9 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 
         Intent npint = new Intent(MainActivity.this, NowPlayingActivity.class);
         npint.putExtra("SONGLIST",songTitles);
+        npint.putExtra("SONGARTISTS", songArtists);
         npint.putExtra("SONGNAME",tag);
+        npint.putExtra("PLAYING",1);
         npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         npint.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         MainActivity.this.startActivity(npint);

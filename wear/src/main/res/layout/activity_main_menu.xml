@@ -8,6 +8,12 @@
     tools:context="com.ashwinkachhara.circularseekbartest.MainMenuActivity"
     tools:deviceIds="wear">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/albumart"
+        android:alpha="0.5"/>
+
     <android.support.wearable.view.WearableListView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"

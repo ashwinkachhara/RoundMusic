@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
     private ArrayList<Song> songList;
     private ArrayList<String> songTitles;
+    private ArrayList<String> songArtists;
     private ListView songView;
     private MusicService musicSrv;
     private Intent playIntent;
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     GoogleApiClient mApiClient;
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
+    private static final String ARTISTS_KEY = "com.ashwinkachhara.key.artists";
     private static final String INITVOLUME_KEY = "com.ashwinkachhara.key.initvolume";
     private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
@@ -113,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         });
 
         songTitles = new ArrayList<String>();
+        songArtists = new ArrayList<String>();
         getSongTitles();
 
         SongAdapter songAdt = new SongAdapter(this, songList);
@@ -167,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     public void onConnected(Bundle bundle) {
         Wearable.DataApi.addListener(mApiClient, this);
         sendSongListToWear();
+        sendSongArtistsToWear();
         sendVolumeToWear(getCurrentPhoneVolume());
     }
 
@@ -223,18 +227,31 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         songTitles.remove(songTitles.size() - 1);
         songTitles.add(Long.toString(System.currentTimeMillis()));
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/SongList");
-        putDataMapReq.getDataMap().putStringArrayList(SONG_KEY,songTitles);
+        putDataMapReq.getDataMap().putStringArrayList(SONG_KEY, songTitles);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
         Log.d("SENDSONGS", pendingResult.toString());
 
     }
 
+    public void sendSongArtistsToWear() {
+//        Log.d("SENDARTISTS", "Sending Songs!");
+        songArtists.remove(songArtists.size() - 1);
+        songArtists.add(Long.toString(System.currentTimeMillis()));
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/ArtistsList");
+        putDataMapReq.getDataMap().putStringArrayList(ARTISTS_KEY,songArtists);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+//        Log.d("SENDSONGS", pendingResult.toString());
+    }
+
     public void getSongTitles(){
         for (int i=0; i<songList.size();i++) {
             songTitles.add(songList.get(i).getTitle());
+            songArtists.add(songList.get(i).getArtist());
         }
         songTitles.add(Long.toString(System.currentTimeMillis()));
+        songArtists.add(Long.toString(System.currentTimeMillis()));
     }
 
     //connect to the service
@@ -530,12 +547,16 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                     switch(activity){
                         case 0:
                             sendSongListToWear();
+                            sendSongArtistsToWear();
                             break;
                         case 1:
                             sendVolumeToWear(getCurrentPhoneVolume());
+                            if (!isPlaying())
+                                songPickedFromWear(musicSrv.songPosn);
                             break;
                         case 2:
                             sendSongListToWear();
+                            sendSongArtistsToWear();
                             break;
                     }
                 } else if (item.getUri().getPath().compareTo("/PickSongFromWear") == 0){

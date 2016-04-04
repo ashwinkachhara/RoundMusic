@@ -1,6 +1,7 @@
 package com.ashwinkachhara.circularseekbartest;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
@@ -41,7 +42,9 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     CircularSeekBar volumeSeekBar;
     DonutProgress songProgressBar;
     TextView songNameText;
+    TextView songArtistText;
     protected ArrayList<String> songTitles;
+    protected ArrayList<String> songArtists;
     private int currentSongId;
 
     private GoogleApiClient mApiClient;
@@ -54,10 +57,13 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
     private static final String SONGPROGRESS_KEY = "com.ashwinkachhara.key.songprogress";
     private static final String CURRENTPLAYINGSONG_KEY = "com.ashwinkachhara.key.currentplayingsong";
+    private static final String WEARSONGPICK_KEY = "com.ashwinkachhara.key.wearsongpick";
 
     Boolean playToggleState = false;
     Boolean nextSongState = false;
     Boolean prevSongState = false;
+
+    private boolean PLAYING = false;
 
 
     @Override
@@ -74,6 +80,13 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         volumeSeekBar = (CircularSeekBar) findViewById(R.id.nowPlayingVolumeSeek);
         songProgressBar = (DonutProgress) findViewById(R.id.nowPlayingSongProgressBar);
         songNameText = (TextView) findViewById(R.id.nowPlayingSongName);
+        songArtistText = (TextView) findViewById(R.id.nowPlayingSongArtist);
+
+
+
+        Typeface typeface = Typeface.createFromAsset(getAssets(),"Roboto-Light.ttf");
+        songNameText.setTypeface(typeface);
+        songArtistText.setTypeface(typeface);
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -87,18 +100,24 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
             public void onClick(View v) {
                 sendBoolToPhone("/PlayToggle", PLAY_TOGGLE_KEY, playToggleState);
                 playToggleState = !playToggleState;
+                PLAYING = !PLAYING;
+                if (PLAYING)
+                    playPauseB.setImageResource(R.drawable.pause);
+                else
+                    playPauseB.setImageResource(R.drawable.play);
             }
         });
 
         prevB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendBoolToPhone("/PrevSong",PREVSONG_KEY,prevSongState);
-                prevSongState = ! prevSongState;
+                sendBoolToPhone("/PrevSong", PREVSONG_KEY, prevSongState);
+                prevSongState = !prevSongState;
                 currentSongId--;
                 if (currentSongId == -1)
                     currentSongId += 0;
                 songNameText.setText(songTitles.get(currentSongId));
+                songArtistText.setText(songArtists.get(currentSongId));
             }
         });
 
@@ -106,11 +125,12 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
             @Override
             public void onClick(View v) {
                 sendBoolToPhone("/NextSong", NEXTSONG_KEY, nextSongState);
-                nextSongState = ! nextSongState;
+                nextSongState = !nextSongState;
                 currentSongId++;
                 if (currentSongId == songTitles.size())
-                    currentSongId = songTitles.size()-1;
+                    currentSongId = songTitles.size() - 1;
                 songNameText.setText(songTitles.get(currentSongId));
+                songArtistText.setText(songArtists.get(currentSongId));
 
             }
         });
@@ -147,7 +167,20 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         });
         currentSongId = getIntent().getExtras().getInt("SONGNAME");
         songTitles = getIntent().getExtras().getStringArrayList("SONGLIST");
+        songArtists = getIntent().getExtras().getStringArrayList("SONGARTISTS");
+        songArtistText.setText(songArtists.get(currentSongId));
         songNameText.setText(songTitles.get(currentSongId));
+        if (getIntent().getExtras().getInt("PLAYING") == 0) {
+            playPauseB.setImageResource(R.drawable.pause);
+            if (PLAYING)
+                sendIntToPhone("/PickSongFromWear", WEARSONGPICK_KEY, currentSongId);
+            else
+                PLAYING = false;
+        } else {
+            playPauseB.setImageResource(R.drawable.pause);
+            PLAYING = true;
+        }
+        playPauseB.setImageResource(R.drawable.pause);
     }
 
     private void sendIntToPhone(String path, String key, Integer data){
@@ -200,6 +233,10 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     public void onConnected(Bundle bundle) {
         Wearable.DataApi.addListener(mApiClient, this);
         sendIntToPhone("/WearActivity",WEARACTIVITY_KEY,1);
+        if (!PLAYING) {
+            sendIntToPhone("/PickSongFromWear", WEARSONGPICK_KEY, currentSongId);
+            PLAYING = true;
+        }
         // 0 = MainActivity, 1 = NowPlayingActivity
     }
 
@@ -229,6 +266,7 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
                     int prog = dataMap.getInt(CURRENTPLAYINGSONG_KEY);
                     currentSongId = prog;
                     songNameText.setText(songTitles.get(currentSongId));
+                    songArtistText.setText(songArtists.get(currentSongId));
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted

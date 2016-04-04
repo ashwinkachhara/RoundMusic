@@ -5,7 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".WearActivity">
+    tools:context=".WearActivity"
+    >
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/albumart"
+        android:alpha="0.5"/>
 
 
     <android.support.wearable.view.WearableListView
@@ -59,7 +66,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/smallalphabet"
+        android:src="@drawable/newalphabet"
         />
 
     <com.devadvance.circularseekbar.CircularSeekBar
@@ -73,12 +80,12 @@
         app:circle_x_radius="300dp"
         app:circle_y_radius="300dp"
         app:circle_stroke_width="1dp"
-        app:pointer_radius="3dp"
-        app:pointer_halo_width="3dp"
+        app:pointer_radius="0dp"
+        app:pointer_halo_width="9dp"
         app:max="25"
-        app:pointer_color="#ffffa500"
-        app:pointer_halo_color="#aaffa500"
-        app:pointer_halo_color_ontouch="#aaffa500"
+        app:pointer_color="#6400e8f4"
+        app:pointer_halo_color="#6400e8f4"
+        app:pointer_halo_color_ontouch="#6400e8f4"
         app:circle_colour="#00000000"
-        app:circle_progress_color="#6400e8f4"/>
+        app:circle_progress_color="#00000000"/>
 </android.support.wearable.view.BoxInsetLayout>
