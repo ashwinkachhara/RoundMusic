@@ -81,7 +81,7 @@
     <ImageView
         android:layout_width="120px"
         android:layout_height="120px"
-        android:src="@drawable/play"
+        android:src="@drawable/playpause"
         android:id="@+id/playPauseButton"
         android:layout_marginTop="107px"
         android:layout_marginLeft="100px"/>

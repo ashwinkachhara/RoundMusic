@@ -101,10 +101,10 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
                 sendBoolToPhone("/PlayToggle", PLAY_TOGGLE_KEY, playToggleState);
                 playToggleState = !playToggleState;
                 PLAYING = !PLAYING;
-                if (PLAYING)
-                    playPauseB.setImageResource(R.drawable.pause);
-                else
-                    playPauseB.setImageResource(R.drawable.play);
+//                if (PLAYING)
+//                    playPauseB.setImageResource(R.drawable.pause);
+//                else
+//                    playPauseB.setImageResource(R.drawable.play);
             }
         });
 
@@ -171,16 +171,16 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
         songArtistText.setText(songArtists.get(currentSongId));
         songNameText.setText(songTitles.get(currentSongId));
         if (getIntent().getExtras().getInt("PLAYING") == 0) {
-            playPauseB.setImageResource(R.drawable.pause);
+//            playPauseB.setImageResource(R.drawable.pause);
             if (PLAYING)
                 sendIntToPhone("/PickSongFromWear", WEARSONGPICK_KEY, currentSongId);
             else
                 PLAYING = false;
         } else {
-            playPauseB.setImageResource(R.drawable.pause);
+//            playPauseB.setImageResource(R.drawable.pause);
             PLAYING = true;
         }
-        playPauseB.setImageResource(R.drawable.pause);
+//        playPauseB.setImageResource(R.drawable.pause);
     }
 
     private void sendIntToPhone(String path, String key, Integer data){
