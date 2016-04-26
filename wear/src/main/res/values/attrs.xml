@@ -40,4 +40,8 @@
         <attr name="donut_background_color" format="color"/>
     </declare-styleable>
 
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:windowSwipeToDismiss">false</item>
+    </style>
+
 </resources>

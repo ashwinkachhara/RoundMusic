@@ -88,4 +88,9 @@
         app:pointer_halo_color_ontouch="#6400e8f4"
         app:circle_colour="#00000000"
         app:circle_progress_color="#00000000"/>
+
+    <android.support.wearable.view.DismissOverlayView
+        android:id="@+id/dismiss_overlay_main"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
 </android.support.wearable.view.BoxInsetLayout>

@@ -91,8 +91,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        app:start_angle="272.5"
-        app:end_angle="267.5"
+        app:start_angle="285"
+        app:end_angle="255"
         app:use_custom_radii="true"
         app:circle_x_radius="300dp"
         app:circle_y_radius="300dp"
@@ -104,6 +104,11 @@
         app:pointer_halo_color_ontouch="#aaffa500"
         app:circle_colour="#640097a7"
         app:circle_progress_color="#6400e8f4"/>
+
+    <android.support.wearable.view.DismissOverlayView
+        android:id="@+id/dismiss_overlay_nowplaying"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
 
 
 

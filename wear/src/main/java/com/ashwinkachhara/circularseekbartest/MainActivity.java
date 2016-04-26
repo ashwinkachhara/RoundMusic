@@ -8,10 +8,13 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.wearable.view.CircularButton;
+import android.support.wearable.view.DismissOverlayView;
 import android.support.wearable.view.WatchViewStub;
 import android.support.wearable.view.WearableListView;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.TextView;
@@ -58,6 +61,9 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     private boolean FIRST_DONE = false;
     private boolean REGULARSCROLLED = false;
 
+    private DismissOverlayView mDismissOverlay;
+    private GestureDetector mDetector;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,11 +99,11 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                         int progress = seekBar.getProgress();
                         Context context = getApplicationContext();
                         String text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                        Log.d("SCROLL", text.substring(progress,progress+1));
+                        Log.d("SCROLL", text.substring(progress, progress + 1));
                         int duration = Toast.LENGTH_SHORT;
 
-                        Toast toast = Toast.makeText(context, text.substring(progress,progress+1), duration);
-                        toast.setGravity(Gravity.CENTER,0,0);
+                        Toast toast = Toast.makeText(context, text.substring(progress, progress + 1), duration);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
                     }
 
@@ -106,6 +112,14 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 
                     }
                 });
+
+                // Obtain the DismissOverlayView element
+                mDismissOverlay = (DismissOverlayView) findViewById(R.id.dismiss_overlay_main);
+                mDismissOverlay.setIntroText("");
+                mDismissOverlay.showIntroIfNecessary();
+
+
+
 //                int vol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 //                int maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 //                Log.d("VOLUME", vol + " " + maxVol + " " + (seekBar != null));
@@ -139,6 +153,12 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                 .build();
         mApiClient.connect();
 
+        // Configure a gesture detector
+        mDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            public void onLongPress(MotionEvent ev) {
+                mDismissOverlay.show();
+            }
+        });
 
 
     }
@@ -251,5 +271,11 @@ public class MainActivity extends Activity implements WearableListView.ClickList
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    // Capture long presses
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return mDetector.onTouchEvent(ev) || super.onTouchEvent(ev);
     }
 }

@@ -5,7 +5,10 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
+import android.support.wearable.view.DismissOverlayView;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -64,6 +67,9 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     Boolean prevSongState = false;
 
     private boolean PLAYING = false;
+
+    private DismissOverlayView mDismissOverlay;
+    private GestureDetector mDetector;
 
 
     @Override
@@ -181,6 +187,16 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
             PLAYING = true;
         }
 //        playPauseB.setImageResource(R.drawable.pause);
+        mDismissOverlay = (DismissOverlayView) findViewById(R.id.dismiss_overlay_nowplaying);
+        mDismissOverlay.setIntroText("");
+        mDismissOverlay.showIntroIfNecessary();
+
+        // Configure a gesture detector
+        mDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            public void onLongPress(MotionEvent ev) {
+                mDismissOverlay.show();
+            }
+        });
     }
 
     private void sendIntToPhone(String path, String key, Integer data){
@@ -277,5 +293,11 @@ public class NowPlayingActivity extends WearableActivity implements DataApi.Data
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    // Capture long presses
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return mDetector.onTouchEvent(ev) || super.onTouchEvent(ev);
     }
 }
