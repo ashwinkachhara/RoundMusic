@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
     private ArrayList<Song> songList;
     private ArrayList<String> songTitles;
     private ArrayList<String> songArtists;
+    private ArrayList<String> songAlbums;
     private ListView songView;
     private MusicService musicSrv;
     private Intent playIntent;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
     private static final String ARTISTS_KEY = "com.ashwinkachhara.key.artists";
+    private static final String ALBUMS_KEY = "com.ashwinkachhara.key.albums";
     private static final String INITVOLUME_KEY = "com.ashwinkachhara.key.initvolume";
     private static final String VOLUME_KEY = "com.ashwinkachhara.key.volume";
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
@@ -110,12 +112,17 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 
         Collections.sort(songList, new Comparator<Song>() {
             public int compare(Song a, Song b) {
-                return a.getTitle().compareTo(b.getTitle());
+                return a.getAlbum().compareTo(b.getAlbum());
             }
         });
 
+        for (int i=0; i<songList.size(); i++){
+            Log.i("ALBUMDBG",songList.get(i).getTitle() + "; " + songList.get(i).getAlbum());
+        }
+
         songTitles = new ArrayList<String>();
         songArtists = new ArrayList<String>();
+        songAlbums = new ArrayList<String>();
         getSongTitles();
 
         SongAdapter songAdt = new SongAdapter(this, songList);
@@ -171,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
         Wearable.DataApi.addListener(mApiClient, this);
         sendSongListToWear();
         sendSongArtistsToWear();
+        sendSongAlbumsToWear();
         sendVolumeToWear(getCurrentPhoneVolume());
     }
 
@@ -245,13 +253,24 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
 //        Log.d("SENDSONGS", pendingResult.toString());
     }
 
+    public void sendSongAlbumsToWear() {
+        songAlbums.remove(songAlbums.size()-1);
+        songAlbums.add(Long.toString(System.currentTimeMillis()));
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/AlbumsList");
+        putDataMapReq.getDataMap().putStringArrayList(ALBUMS_KEY,songAlbums);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mApiClient,putDataReq);
+    }
+
     public void getSongTitles(){
         for (int i=0; i<songList.size();i++) {
             songTitles.add(songList.get(i).getTitle());
             songArtists.add(songList.get(i).getArtist());
+            songAlbums.add(songList.get(i).getAlbum());
         }
         songTitles.add(Long.toString(System.currentTimeMillis()));
         songArtists.add(Long.toString(System.currentTimeMillis()));
+        songAlbums.add(Long.toString(System.currentTimeMillis()));
     }
 
     //connect to the service
@@ -408,12 +427,14 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                     (android.provider.MediaStore.Audio.Media._ID);
             int artistColumn = musicCursor.getColumnIndex
                     (android.provider.MediaStore.Audio.Media.ARTIST);
+            int albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
             //add songs to list
             do {
                 long thisId = musicCursor.getLong(idColumn);
                 String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
-                songList.add(new Song(thisId, thisTitle, thisArtist));
+                String thisAlbum = musicCursor.getString(albumColumn);
+                songList.add(new Song(thisId, thisTitle, thisArtist, thisAlbum));
             }
             while (musicCursor.moveToNext());
         }
@@ -548,6 +569,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                         case 0:
                             sendSongListToWear();
                             sendSongArtistsToWear();
+                            sendSongAlbumsToWear();
                             break;
                         case 1:
                             sendVolumeToWear(getCurrentPhoneVolume());
@@ -557,6 +579,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayerContro
                         case 2:
                             sendSongListToWear();
                             sendSongArtistsToWear();
+                            sendSongAlbumsToWear();
                             break;
                     }
                 } else if (item.getUri().getPath().compareTo("/PickSongFromWear") == 0){

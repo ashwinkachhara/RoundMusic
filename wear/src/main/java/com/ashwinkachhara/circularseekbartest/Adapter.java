@@ -23,6 +23,7 @@ import java.util.Set;
 public final class Adapter extends WearableListView.Adapter implements SectionIndexer{
     private ArrayList<String> mDataset;
     private ArrayList<String> mArtists;
+    private ArrayList<String> mAlbums;
     private final Context mContext;
     private final LayoutInflater mInflater;
 
@@ -31,16 +32,17 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
     private String[] sections;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public Adapter(Context context, ArrayList<String> dataset, ArrayList<String> artists) {
+    public Adapter(Context context, ArrayList<String> dataset, ArrayList<String> artists, ArrayList<String> albums) {
         alphaIndexer = new HashMap<String, Integer>();
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mDataset = dataset;
         mArtists = artists;
+        mAlbums = albums;
 
-        for (int i = 0; i < mDataset.size(); i++)
+        for (int i = 0; i < mAlbums.size(); i++)
         {
-            String s = mDataset.get(i).substring(0, 1).toUpperCase();
+            String s = mAlbums.get(i).substring(0, 1).toUpperCase();
             if (!alphaIndexer.containsKey(s))
                 alphaIndexer.put(s, i);
         }
@@ -67,7 +69,7 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
         int i;
         for (i=0;i<alphaIndexer.size();i++){
             if (position < alphaIndexer.get(sections[i])) {
-                if (mDataset.get(position).charAt(0) == mDataset.get(alphaIndexer.get(sections[i])).charAt(0))
+                if (mAlbums.get(position).charAt(0) == mAlbums.get(alphaIndexer.get(sections[i])).charAt(0))
                     return i;
                 else
                     return i-1;
@@ -79,12 +81,12 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
     // Provide a reference to the type of views you're using
     public static class ItemViewHolder extends WearableListView.ViewHolder {
         private TextView textView;
-        private TextView artistView;
+        private TextView albumView;
         public ItemViewHolder(View itemView) {
             super(itemView);
             // find the text view within the custom item's layout
             textView = (TextView) itemView.findViewById(R.id.name);
-            artistView = (TextView) itemView.findViewById(R.id.artist);
+            albumView = (TextView) itemView.findViewById(R.id.album);
         }
     }
 
@@ -106,9 +108,9 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
         // retrieve the text view
         ItemViewHolder itemHolder = (ItemViewHolder) holder;
         TextView view = itemHolder.textView;
-        TextView artistView = itemHolder.artistView;
+        TextView albumView = itemHolder.albumView;
         // replace text contents
-        artistView.setText(mArtists.get(position));
+        albumView.setText(mAlbums.get(position));
         view.setText(mDataset.get(position));
         // replace list item's metadata
         holder.itemView.setTag(position);
@@ -118,6 +120,6 @@ public final class Adapter extends WearableListView.Adapter implements SectionIn
     // (invoked by the WearableListView's layout manager)
     @Override
     public int getItemCount() {
-        return mDataset.size();
+        return mAlbums.size();
     }
 }

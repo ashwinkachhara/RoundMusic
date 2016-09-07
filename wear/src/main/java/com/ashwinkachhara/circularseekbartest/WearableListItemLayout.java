@@ -14,6 +14,7 @@ public class WearableListItemLayout extends LinearLayout
         implements WearableListView.OnCenterProximityListener {
 
     private TextView mName;
+    private TextView mAlbum;
 
     private final float mFadedTextAlpha;
 
@@ -39,15 +40,18 @@ public class WearableListItemLayout extends LinearLayout
         // These are defined in the layout file for list items
         // (see next section)
         mName = (TextView) findViewById(R.id.name);
+        mAlbum = (TextView) findViewById(R.id.album);
     }
 
     @Override
     public void onCenterPosition(boolean animate) {
         mName.setAlpha(1f);
+        mAlbum.setAlpha(1f);
     }
 
     @Override
     public void onNonCenterPosition(boolean animate) {
         mName.setAlpha(mFadedTextAlpha);
+        mAlbum.setAlpha(mFadedTextAlpha);
     }
 }

@@ -18,16 +18,23 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed-light"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:ellipsize="marquee"
+            android:maxLines="1"
+            android:text = "Hello,"/>
 
         <TextView
-            android:id="@+id/artist"
+            android:id="@+id/album"
             android:layout_width="fill_parent"
+            android:ellipsize="marquee"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="16dp"
             android:layout_height="wrap_content"
             android:textColor="#aaaaaa"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:maxLines="1"
+            android:text = "World! World! World! World! World! World! World! World!"
+            />
     </LinearLayout>
 
 </com.ashwinkachhara.circularseekbartest.WearableListItemLayout>

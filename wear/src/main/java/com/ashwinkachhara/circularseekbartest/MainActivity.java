@@ -47,6 +47,7 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 
     private static final String SONG_KEY = "com.ashwinkachhara.key.song";
     private static final String ARTISTS_KEY = "com.ashwinkachhara.key.artists";
+    private static final String ALBUMS_KEY = "com.ashwinkachhara.key.albums";
     private static final String WEARACTIVITY_KEY = "com.ashwinkachhara.key.wearactivity";
     private static final String WEARSONGPICK_KEY = "com.ashwinkachhara.key.wearsongpick";
 
@@ -54,10 +55,12 @@ public class MainActivity extends Activity implements WearableListView.ClickList
 
     protected ArrayList<String> songTitles;
     protected ArrayList<String> songArtists;
+    protected ArrayList<String> songAlbums;
     private com.ashwinkachhara.circularseekbartest.Adapter songListAdapter;
 
     private boolean GOT_SONGS = false;
     private boolean GOT_ARTISTS = false;
+    private boolean GOT_ALBUMS = false;
     private boolean FIRST_DONE = false;
     private boolean REGULARSCROLLED = false;
 
@@ -223,6 +226,13 @@ public class MainActivity extends Activity implements WearableListView.ClickList
                     songArtists.remove(songArtists.size()-1);
                     GOT_ARTISTS = true;
                     loadAdapter();
+                } else if (item.getUri().getPath().compareTo("/AlbumsList") == 0){
+//                    Log.d("DATACHNG", "Some Songs");
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    songAlbums = dataMap.getStringArrayList(ALBUMS_KEY);
+                    songAlbums.remove(songAlbums.size()-1);
+                    GOT_ALBUMS = true;
+                    loadAdapter();
                 }
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
                 // DataItem deleted
@@ -236,8 +246,8 @@ public class MainActivity extends Activity implements WearableListView.ClickList
             items.add("Item "+i);
         }
         //items.add(new SettingsItems(R.drawable.ic_color, getString(R.string.theme)));
-        if (GOT_SONGS && GOT_ARTISTS) {
-            songListAdapter = new com.ashwinkachhara.circularseekbartest.Adapter(this, songTitles, songArtists);
+        if (GOT_SONGS && GOT_ARTISTS && GOT_ALBUMS) {
+            songListAdapter = new com.ashwinkachhara.circularseekbartest.Adapter(this, songTitles, songArtists, songAlbums);
             listView.setAdapter(songListAdapter);
         }
 //        else
